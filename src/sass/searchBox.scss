@@ -1,27 +1,18 @@
 .search-box {
-	position: relative;
+	padding: 0 20px;
 	margin: 40px auto;
 	max-width: 560px;
-	height: 44px;
-	background-color: #F1F3F4;
-	border: none;
-	border-radius: 22px;
-	box-shadow: none;
-	outline: none;
-	opacity: 1;
-	transition: opacity 200ms;
-
 	overflow: hidden;
 
 	&__input {
-		padding: 0 20px;
+		padding: 10px 20px;
 		margin: 0;
-		position: absolute;
 		top: 2px;
 		left: 0;
 		width: 100%;
-		background: transparent;
+		background-color: #F1F3F4;
 		border: none;
+		border-radius: 22px;
 		bottom: 0;
 		box-sizing: border-box;
 		outline: none;

@@ -9,22 +9,30 @@
 	overflow: hidden;
 
 	&__wrapper {
+		padding: 0 20px;
 		position: relative;
 		display: flex;
-		min-width: 100%;
+		justify-content: space-between;
 		height: 542px;
 		transition: transform .7s ease;
+
+		&_content-center {
+			justify-content: center;
+		}
 	}
 
 	&__nav {
+		padding: 0 20px;
 		display: flex;
 		align-items: center;
 		flex-grow: 1;
 		justify-content: center;
+		flex-wrap: wrap;
 	}
 }
 
 .dot {
+	margin-bottom: 10px;
 	width: 24px;
 	height: 24px;
 	line-height: 24px;
