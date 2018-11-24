@@ -23,9 +23,9 @@ const makeRequest = (method, url) => {
     });
 };
 
-export const getClipList = (query) => {
+export const getClipList = (query, maxResults) => {
     return makeRequest('GET',
-        'https://www.googleapis.com/youtube/v3/search?maxResults=15&part=snippet&type=video&key=AIzaSyDXwwh51G-zqD-zbMkzMjQpm_Mg8zRUf4Y&q='+query);
+        `https://www.googleapis.com/youtube/v3/search?maxResults=${maxResults}&part=snippet&type=video&key=AIzaSyDXwwh51G-zqD-zbMkzMjQpm_Mg8zRUf4Y&q=${query}`);
 };
 
 export const getViewCount = (videoId) => {
