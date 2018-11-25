@@ -11,7 +11,7 @@
   .search-box__input {
     padding: 10px 20px;
     margin: 0;
-    top: 2px;
+    top: 5px;
     left: 0;
     width: 100%;
     background-color: #F1F3F4;
@@ -21,12 +21,13 @@
     -webkit-box-sizing: border-box;
             box-sizing: border-box;
     outline: none;
+    font-size: 16px;
     font-family: "Roboto", sans-serif;
     font-weight: 400; }
   .search-box__button {
     position: absolute;
     right: 37px;
-    top: 0;
+    top: 5px;
     width: 50px;
     text-align: right;
     padding: 5.5px 0;
