@@ -2,7 +2,8 @@ import {getClipList, getViewCount} from "./youtubeRestClient";
 import ClipNavigation from "./ClipNavigation";
 import ClipList from "./ClipList";
 import Clip from "./Clip";
-import {clipsChunkSize} from "./constants";
+import SearchBox from "./SearchBox";
+import {clipsChunkSize, clipWidth, minClipMargin} from "./constants";
 
 export default class ClipsContainer {
 
@@ -10,7 +11,6 @@ export default class ClipsContainer {
     this.container = container;
     this.clips = [];
     this.clipsPerPageCount = 0;
-    this.pagesCount = 1;
     this.chunkSize = clipsChunkSize;
     this.render();
   }
@@ -36,6 +36,7 @@ export default class ClipsContainer {
 
   static markup(){
     return `
+            <div class="search-box"></div>
             <div class="clip-list__wrapper"></div>
             <div class="clip-list__nav"></div>
       `
@@ -45,7 +46,7 @@ export default class ClipsContainer {
     let clipListContainerWidth = this.container.offsetWidth;
 
     if(newPageNumber > this.clipNavigation.currentPage) this.wrapperElement.style.transform = `translateX(${-clipListContainerWidth}px)`;
-    else this.wrapperElement.style.transform = `translateX(${clipListContainerWidth}px)`;
+    else if(newPageNumber < this.clipNavigation.currentPage) this.wrapperElement.style.transform = `translateX(${clipListContainerWidth}px)`;
     this.clipNavigation.currentPage = newPageNumber;
     let promise = new Promise( (resolve, reject) => {
       setTimeout( () => {
@@ -64,12 +65,16 @@ export default class ClipsContainer {
 
   updateListSettings(){
     let clipListContainerWidth = this.container.offsetWidth;
-    if(clipListContainerWidth > 425){
-      let clipPerPageCount = Math.floor(clipListContainerWidth / 400);
-      let clipMargin = (clipListContainerWidth - 400 * clipPerPageCount) / (clipPerPageCount * 2);
-      if(clipMargin < 12.5){
+
+    if(clipListContainerWidth > clipWidth + minClipMargin){
+      let clipPerPageCount = Math.floor(clipListContainerWidth / clipWidth);
+      let clipMargin = (clipListContainerWidth - clipWidth * clipPerPageCount) / (clipPerPageCount * 2);
+      if(clipMargin < minClipMargin / 2){
         clipPerPageCount--;
       }
+
+      let pageCount = Math.floor(this.clips.length / clipPerPageCount);
+      if(pageCount * clipPerPageCount !== this.clips.length) pageCount++;
 
       if(clipPerPageCount === 1) this.wrapperElement.classList.add('clip-list__wrapper_content-center');
 
@@ -80,14 +85,16 @@ export default class ClipsContainer {
         while (this.wrapperElement.firstChild) {
           this.wrapperElement.removeChild(this.wrapperElement.firstChild);
         }
-
-        this.clipList.pageClips = this.clips.slice((this.clipNavigation.currentPage - 1) * clipPerPageCount, this.clipNavigation.currentPage * clipPerPageCount);
+        if(this.clipNavigation.currentPage > pageCount){
+          this.clipList.pageClips = this.clips.slice((pageCount - 1) * clipPerPageCount, pageCount * clipPerPageCount);
+          this.clipNavigation.currentPage = pageCount;
+        }else{
+          this.clipList.pageClips = this.clips.slice((this.clipNavigation.currentPage - 1) * clipPerPageCount, this.clipNavigation.currentPage * clipPerPageCount);
+        }
       }
       this.clipsPerPageCount = clipPerPageCount;
-      let pageCount = Math.floor(this.clips.length / clipPerPageCount);
-      if(pageCount * clipPerPageCount !== this.clips.length) pageCount++;
-      this.pagesCount = pageCount;
-      this.clipNavigation.pagesCount = this.pagesCount;
+
+      this.clipNavigation.pagesCount = pageCount;
     }
   };
 
@@ -109,21 +116,36 @@ export default class ClipsContainer {
     this.clipList = new ClipList(this.wrapperElement);
     this.navigationElement = this.container.querySelector('.clip-list__nav');
     this.clipNavigation = new ClipNavigation(this.navigationElement);
+    this.searchInputElement = this.container.querySelector('.search-box');
+    this.searchInput = new SearchBox(this.searchInputElement);
+    this.addEventListeners();
+  };
 
-    let keyword = "";
+  addEventListeners(){
+
+    document.getElementById('keyword').addEventListener('keypress', (event) => {
+      if(event.keyCode === 13) {
+        this.searchInput.keyword = event.target.value;
+        this.container.dispatchEvent(new CustomEvent('getClips'));
+      }
+    });
+
+    document.getElementById("search").addEventListener('click', (event) => {
+      this.searchInput.keyword = document.getElementById('keyword').value;
+      this.container.dispatchEvent(new CustomEvent('getClips'));
+    });
 
     this.container.addEventListener('getClips', (event) => {
       this.clips.length = 0;
       this.chunkSize = clipsChunkSize;
-      keyword = event.detail.keyword;
-      this.loadClips(event.detail.keyword, this.chunkSize, 1);
+      this.loadClips(this.searchInput.keyword, this.chunkSize, 1);
     });
 
     this.navigationElement.addEventListener('click', (event) => {
       console.log(event.target);
       if(event.target.className === 'dot'){
         let newPage = parseInt(event.target.innerText, 10);
-        if(newPage === this.pagesCount){
+        if(newPage === this.clipNavigation.pagesCount){
           this.chunkSize += clipsChunkSize;
           this.loadClips(keyword, this.chunkSize, newPage);
         }else{
@@ -151,15 +173,15 @@ export default class ClipsContainer {
       return false;
     });
 
-    this.wrapperElement.addEventListener('mousemove', (event) => {
+    this.container.addEventListener('mousemove', (event) => {
       if(down){
         let newMouseX = event.clientX;
         translateX = newMouseX - mouseX;
-        this.wrapperElement.style.transform = `translateX(${translateX}px)`;
+        this.wrapperElement.style.left = `${translateX}px`;
       }
     });
 
-    this.wrapperElement.addEventListener('touchmove', (event) => {
+    this.container.addEventListener('touchmove', (event) => {
       if(down){
         let newMouseX = event.touches[0].pageX;
         translateX = newMouseX - mouseX;
@@ -167,16 +189,17 @@ export default class ClipsContainer {
       }
     });
 
-    this.wrapperElement.addEventListener('mouseup', (event) => {
+    this.container.addEventListener('mouseup', (event) => {
       if(down){
         let currPage = this.clipNavigation.currentPage;
+        this.wrapperElement.style.left = '0px';
         if(translateX < 0) this.updateWrapper(currPage + 1);
         else if(translateX > 0 && currPage !== 1) this.updateWrapper(currPage - 1);
         down = false;
       }
     });
 
-    this.wrapperElement.addEventListener('touchend', (event) => {
+    this.container.addEventListener('touchend', (event) => {
       if(down){
         let currPage = this.clipNavigation.currentPage;
         if(translateX < 0) this.updateWrapper(currPage + 1);

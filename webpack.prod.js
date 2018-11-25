@@ -1,12 +1,15 @@
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
+    devtool: 'source-map',
     entry: './src/main.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'bundle.js'
+        filename: 'js/bundle.js'
     },
     module: {
         rules: [
@@ -20,37 +23,39 @@ module.exports = {
                 ]
             },
             {
-                test: /\.(gif|png|jpe?g|svg|woff|woff2|eot|ttf)$/i,
+                test: /\.(gif|png|jpe?g)$/i,
                 use: [{
                     loader: 'file-loader',
                     options: {
-                        name: '[hash].[ext]'
+                      name: '[hash].[ext]'
                     }
                 }],
             },
+            { test: /\.(woff|woff2|eot|ttf)$/, loader: 'url-loader?limit=100000' },
             {
-                test: /\.js$/,
-                exclude: /(node_modules|bower_components)/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['@babel/preset-env']
-                    }
+              test: /\.js$/,
+              exclude: /(node_modules|bower_components)/,
+              use: {
+                loader: 'babel-loader',
+                options: {
+                  presets: ['@babel/preset-env']
                 }
+              }
             }
         ]
     },
     plugins: [
+        new CleanWebpackPlugin(['dist']),
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify('production')
+        }),
         new MiniCssExtractPlugin({
             filename: "[name].css",
             chunkFilename: "[id].css"
         }),
         new HtmlWebPackPlugin({
-            template: path.join('src', 'index.html')
+          template: "./src/index.html",
+          filename: "./index.html"
         })
-    ],
-    devServer: {
-        historyApiFallback: true,
-        disableHostCheck: true
-    }
+    ]
 };

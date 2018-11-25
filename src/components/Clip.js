@@ -28,20 +28,22 @@ export default class Clip {
         clipContainer.innerHTML = `
                 <figure class="clip__screenshot">
                     <img src="${this.screenshotUrl}" alt="">
-                    <figcaption class="clip__caption">${this.title}</figcaption>
+                    <figcaption class="clip__caption">
+                        <a class="clip__link" href="https://www.youtube.com/watch/?v=${this.id}" target="_blank">${this.title}</a>
+                    </figcaption>
                 </figure>
                 <div class="clip__info">
                     <div class="clip__item">
-                        <div class="clip__icon"></div>
+                        <div class="clip__icon"><i class="material-icons">person</i></div>
                         <div class="clip__value">${this.channel}</div>
                     </div>
                     <div class="clip__item">
-                        <div class="clip__icon"></div>
-                        <div class="clip__value">${this.uploadDate}</div>
+                        <div class="clip__icon"><i class="material-icons">date_range</i></div>
+                        <div class="clip__value">${new Date(this.uploadDate).toLocaleDateString('en-US')}</div>
                     </div>
                     <div class="clip__item">
-                        <div class="clip__icon"></div>
-                        <div class="clip__value">${this.viewsCount}</div>
+                        <div class="clip__icon"><i class="material-icons">face</i></div>
+                        <div class="clip__value">${this.viewsCount} views</div>
                     </div>
                     <p class="clip__description">
                         ${this.description}

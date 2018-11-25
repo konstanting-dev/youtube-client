@@ -17,7 +17,8 @@ export default class SearchBox {
 
   render(){
     this.container.innerHTML = `
-        <input class="search-box__input" id="keyword" type="search" value="${this.keywordValue}" placeholder="Введите запрос">
+        <input class="search-box__input" id="keyword" type="text" value="${this.keywordValue}" placeholder="Enter the keyword">
+        <button class="search-box__button" id="search"><i class="material-icons">search</i></button>
       `;
   };
 }

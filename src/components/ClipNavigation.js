@@ -1,8 +1,8 @@
 export default class ClipNavigation {
   init(container) {
     this.container = container;
-    this.pagesCountValue = 1;
-    this.currentPageValue = 1;
+    this.pagesCountValue = 0;
+    this.currentPageValue = 0;
     this.render();
   }
   set pagesCount(count){
@@ -27,7 +27,7 @@ export default class ClipNavigation {
     let html = '';
     for(let i = 0; i < this.pagesCountValue; i++){
       html += `
-        <span class="dot${this.currentPageValue - 1 === i ? ' dot_active' : ''}">${i + 1}</span>
+        <span class="dot${this.currentPageValue - 1 === i ? ' dot_active' : ''}" title="${i + 1}">${i + 1}</span>
       `;
     }
     this.container.innerHTML = html;
