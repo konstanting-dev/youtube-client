@@ -47,7 +47,7 @@ module.exports = {
             'process.env.NODE_ENV': JSON.stringify('production')
         }),
         new MiniCssExtractPlugin({
-            filename: "[name].css",
+            filename: "[name].[contenthash].css",
             chunkFilename: "[id].css"
         }),
         new HtmlWebPackPlugin({

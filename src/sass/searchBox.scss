@@ -13,7 +13,7 @@
 	&__input {
 		padding: 10px 20px;
 		margin: 0;
-		top: 2px;
+		top: 5px;
 		left: 0;
 		width: 100%;
 		background-color: #F1F3F4;
@@ -22,6 +22,7 @@
 		bottom: 0;
 		box-sizing: border-box;
 		outline: none;
+		font-size: 16px;
 		font-family: "Roboto", sans-serif;
 		font-weight: 400;
 	}
@@ -29,7 +30,8 @@
 	&__button {
 		position: absolute;
 		right: 37px;
-		top: 0;
+		top: 50%;
+		transform: translateY(-50%);
 		width: 50px;
 		text-align: right;
 		padding: 5.5px 0;
@@ -40,5 +42,9 @@
 		box-shadow: none;
 		-webkit-appearance: none;
 		-moz-appearance: none;
+
+		.material-icons {
+			vertical-align: middle;
+		}
 	}
 }
