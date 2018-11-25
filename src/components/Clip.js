@@ -1,31 +1,29 @@
-import "./sass/clip.scss";
+import '../sass/clip.scss';
 
 export default class Clip {
+  constructor(id, title, screenshotUrl, channel, uploadDate, viewsCount = 0, description) {
+    this.id = id;
+    this.title = title;
+    this.screenshotUrl = screenshotUrl;
+    this.channel = channel;
+    this.uploadDate = uploadDate;
+    this.viewsCount = viewsCount;
+    this.description = description;
+  }
+
+  get videoId() {
+    return this.id;
+  }
+
+  set views(count) {
+    this.viewsCount = count;
+  }
 
 
-    constructor(id, title, screenshotUrl, channel, uploadDate, viewsCount = 0, description){
-        this.id = id;
-        this.title = title;
-        this.screenshotUrl = screenshotUrl;
-        this.channel = channel;
-        this.uploadDate = uploadDate;
-        this.viewsCount = viewsCount;
-        this.description = description;
-    }
-
-    get videoId(){
-      return this.id;
-    };
-
-    set views(count){
-      this.viewsCount = count;
-    };
-
-
-    renderClip(){
-        let clipContainer = document.createElement('div');
-        clipContainer.classList.add('clip');
-        clipContainer.innerHTML = `
+  renderClip() {
+    const clipContainer = document.createElement('div');
+    clipContainer.classList.add('clip');
+    clipContainer.innerHTML = `
                 <figure class="clip__screenshot">
                     <img src="${this.screenshotUrl}" alt="">
                     <figcaption class="clip__caption">
@@ -51,6 +49,6 @@ export default class Clip {
                 </div>
                 
         `;
-        return clipContainer;
-    };
+    return clipContainer;
+  }
 }

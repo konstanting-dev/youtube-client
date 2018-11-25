@@ -5,31 +5,36 @@ export default class ClipNavigation {
     this.currentPageValue = 0;
     this.render();
   }
-  set pagesCount(count){
+
+  set pagesCount(count) {
     this.pagesCountValue = count;
     this.render();
-  };
-  get pagesCount(){
+  }
+
+  get pagesCount() {
     return this.pagesCountValue;
-  };
-  set currentPage(page){
+  }
+
+  set currentPage(page) {
     this.currentPageValue = page;
     this.render();
-  };
-  get currentPage(){
+  }
+
+  get currentPage() {
     return this.currentPageValue;
-  };
+  }
+
   constructor(container) {
     this.init(container);
-  };
+  }
 
-  render(){
+  render() {
     let html = '';
-    for(let i = 0; i < this.pagesCountValue; i++){
+    for (let i = 0; i < this.pagesCountValue; i += 1) {
       html += `
         <span class="dot${this.currentPageValue - 1 === i ? ' dot_active' : ''}" title="${i + 1}">${i + 1}</span>
       `;
     }
     this.container.innerHTML = html;
-  };
+  }
 }
