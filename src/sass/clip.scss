@@ -1,9 +1,7 @@
-@import "fonts";
-
 .clip {
 	box-sizing: border-box;
 	margin: 0 0 25px 0;
-	width: 400px;
+	width: var(--clip-width);
 	display: flex;
 	flex-direction: column;
 	flex-shrink: 0;
@@ -41,12 +39,21 @@
 	&__item {
 		display: flex;
 		margin-bottom: 20px;
+		align-items: center;
 	}
 	&__info {
 		padding: 20px;
 	}
+	&__link {
+		color: inherit;
+		text-decoration: none;
+	}
 	&__icon {
+		margin-right: 5px;
 
+		.material-icons {
+			vertical-align: middle;
+		}
 	}
 
 	&__value {
