@@ -78,7 +78,7 @@ export default class ClipsContainer {
       let clipPerPageCount = Math.floor(clipListContainerWidth / clipWidth);
       const clipMargin = (clipListContainerWidth - clipWidth * clipPerPageCount) / (clipPerPageCount * 2);
       if (clipMargin < minClipMargin / 2) {
-        clipPerPageCount = -1;
+        clipPerPageCount -= 1;
       }
 
       let pageCount = Math.floor(this.clips.length / clipPerPageCount);
@@ -145,6 +145,7 @@ export default class ClipsContainer {
     this.container.addEventListener('getClips', () => {
       this.clips.length = 0;
       this.chunkSize = clipsChunkSize;
+      this.clipNavigation.currentPageValue = 0;
       this.loadClips(this.searchInput.keyword, this.chunkSize, 1);
     });
 
