@@ -5,6 +5,9 @@
   width: 100%;
   max-width: 560px;
   overflow: hidden; }
+  @media screen and (max-width: 480px) {
+    .search-box {
+      width: 80%; } }
   .search-box__input {
     padding: 10px 20px;
     margin: 0;
