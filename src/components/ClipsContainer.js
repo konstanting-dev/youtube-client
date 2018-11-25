@@ -73,14 +73,16 @@ export default class ClipsContainer {
 
   updateListSettings() {
     const clipListContainerWidth = this.container.offsetWidth;
-
+    let clipPerPageCount;
     if (clipListContainerWidth > clipWidth + minClipMargin) {
-      let clipPerPageCount = Math.floor(clipListContainerWidth / clipWidth);
+      clipPerPageCount = Math.floor(clipListContainerWidth / clipWidth);
       const clipMargin = (clipListContainerWidth - clipWidth * clipPerPageCount) / (clipPerPageCount * 2);
       if (clipMargin < minClipMargin / 2) {
         clipPerPageCount -= 1;
       }
-
+    }else{
+      clipPerPageCount = 1;
+    }
       let pageCount = Math.floor(this.clips.length / clipPerPageCount);
       if (pageCount * clipPerPageCount !== this.clips.length) pageCount += 1;
 
@@ -103,7 +105,6 @@ export default class ClipsContainer {
       this.clipsPerPageCount = clipPerPageCount;
 
       this.clipNavigation.pagesCount = pageCount;
-    }
   }
 
   loadClips(keyword, chunkSize, pageNumber) {
@@ -191,7 +192,7 @@ export default class ClipsContainer {
       if (down) {
         const newMouseX = event.touches[0].pageX;
         translateX = newMouseX - mouseX;
-        this.wrapperElement.style.transform = `translateX(${translateX}px)`;
+        this.wrapperElement.style.left = `translateX(${translateX}px)`;
       }
     });
 
@@ -208,6 +209,7 @@ export default class ClipsContainer {
     this.container.addEventListener('touchend', () => {
       if (down) {
         const currPage = this.clipNavigation.currentPage;
+        this.wrapperElement.style.left = '0px';
         if (translateX < 0) this.updateWrapper(currPage + 1);
         else if (translateX > 0 && currPage !== 1) this.updateWrapper(currPage - 1);
         down = false;
