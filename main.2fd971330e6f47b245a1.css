@@ -27,7 +27,10 @@
   .search-box__button {
     position: absolute;
     right: 37px;
-    top: 5px;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
     width: 50px;
     text-align: right;
     padding: 5.5px 0;
@@ -39,6 +42,8 @@
             box-shadow: none;
     -webkit-appearance: none;
     -moz-appearance: none; }
+    .search-box__button .material-icons {
+      vertical-align: middle; }
 
 /* roboto-300 - latin */
 @font-face {
