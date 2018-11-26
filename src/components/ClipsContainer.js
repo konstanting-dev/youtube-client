@@ -165,35 +165,40 @@ export default class ClipsContainer {
     let down = false;
     let mouseX = 0;
     let translateX = 0;
+    let swipeX = 0;
+    let swipeY = 0;
 
     this.wrapperElement.addEventListener('mousedown', (event) => {
-      event.preventDefault();
       down = true;
       mouseX = event.clientX;
       return false;
     });
 
     this.wrapperElement.addEventListener('touchstart', (event) => {
-      event.preventDefault();
-      down = true;
-      mouseX = event.touches[0].pageX;
+      swipeX = event.touches[0].pageX;
+      swipeY = event.touches[0].pageY;
       return false;
     });
 
     this.container.addEventListener('mousemove', (event) => {
-      if (down) {
-        const newMouseX = event.clientX;
-        translateX = newMouseX - mouseX;
-        this.wrapperElement.style.left = `${translateX}px`;
-      }
+        if(down){
+          const newMouseX = event.clientX;
+          translateX = newMouseX - mouseX;
+          this.wrapperElement.style.left = `${translateX}px`;
+        }
     });
 
     this.container.addEventListener('touchmove', (event) => {
-      if (down) {
-        const newMouseX = event.touches[0].pageX;
-        translateX = newMouseX - mouseX;
-        this.wrapperElement.style.left = `translateX(${translateX}px)`;
-      }
+        down = true;
+        const newSwipeX = event.touches[0].pageX;
+        const newSwipeY = event.touches[0].pageY;
+
+        if(Math.abs(newSwipeX - swipeX) < Math.abs(newSwipeY - swipeY)){
+          down = false;
+        }else{
+          translateX = newSwipeX - swipeX;
+          this.wrapperElement.style.left = `translateX(${translateX}px)`;
+        }
     });
 
     this.container.addEventListener('mouseup', () => {

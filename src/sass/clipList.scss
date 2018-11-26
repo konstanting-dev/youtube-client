@@ -39,11 +39,6 @@
 	padding: 0;
 	text-align: center;
 	color: #ffffff;
-	border: none;
-	outline: none;
-	appearance: none;
-	-webkit-appearance: none;
-	-moz-appearance: none;
 	border-radius: 50%;
 	cursor: pointer;
 	background: grey;
@@ -51,10 +46,6 @@
 	font-family: "Roboto", sans-serif;
 	font-weight: 300;
 	font-size: 12px;
-
-	&:focus {
-		outline: none;
-	}
 
 	&:not(:last-child) {
 		margin-right: 10px;
