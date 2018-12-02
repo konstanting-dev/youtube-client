@@ -1,10 +1,9 @@
 /* eslint max-len: ["error", { "code": 120 }] */
-
-import { getClipList, getViewCount } from '../youtubeRestClient';
 import ClipNavigation from './ClipNavigation';
 import ClipList from './ClipList';
 import Clip from './Clip';
 import SearchBox from './SearchBox';
+import * as api from '../youtubeRestClient';
 import { clipsChunkSize, clipWidth, minClipMargin } from '../constants';
 
 export default class ClipsContainer {
@@ -17,21 +16,34 @@ export default class ClipsContainer {
   }
 
   set Clips(clips) {
-    this.clips = this.clips.concat(clips.map((clip) => {
-      const {
-        title, publishedAt, description, thumbnails, channelTitle,
-      } = clip.snippet;
-      const { videoId } = clip.id;
+    this.clips = this.clips.concat(
+      clips.map((clip) => {
+        const {
+          title, publishedAt, description, thumbnails, channelTitle,
+        } = clip.snippet;
+        const { videoId } = clip.id;
 
-      const clipObject = new Clip(videoId, title, thumbnails.high.url,
-        channelTitle, publishedAt, 0, description);
-      getViewCount(videoId)
-        .then((response) => {
+        const clipObject = new Clip(
+          videoId,
+          title,
+          thumbnails.high.url,
+          channelTitle,
+          publishedAt,
+          0,
+          description,
+        );
+
+        api.getViewCount(videoId).then((response) => {
           const stats = JSON.parse(response);
           clipObject.viewsCount = stats.items[0].statistics.viewCount;
         });
-      return clipObject;
-    }));
+        return clipObject;
+      }),
+    );
+  }
+
+  get Clips() {
+    return this.clips;
   }
 
   constructor(container) {
@@ -57,63 +69,72 @@ export default class ClipsContainer {
     this.clipNavigation.currentPage = newPageNumber;
     const promise = new Promise((resolve) => {
       setTimeout(() => {
-        while (this.wrapperElement.firstChild) {
-          this.wrapperElement.removeChild(this.wrapperElement.firstChild);
-        }
+        this.clipList.pageClips = this.clips.slice(
+          (newPageNumber - 1) * this.clipsPerPageCount,
+          newPageNumber * this.clipsPerPageCount,
+        );
         resolve();
       }, 700);
     });
 
     promise.then(() => {
-      this.clipList.pageClips = this.clips.slice((newPageNumber - 1) * this.clipsPerPageCount,
-        newPageNumber * this.clipsPerPageCount);
       this.wrapperElement.style.transform = 'translateX(0px)';
     });
+
+    return promise;
   }
 
   updateListSettings() {
     const clipListContainerWidth = this.container.offsetWidth;
-    let clipPerPageCount;
-    if (clipListContainerWidth > clipWidth + minClipMargin) {
-      clipPerPageCount = Math.floor(clipListContainerWidth / clipWidth);
-      const clipMargin = (clipListContainerWidth - clipWidth * clipPerPageCount) / (clipPerPageCount * 2);
-      if (clipMargin < minClipMargin / 2) {
+
+    let clipPerPageCount = Math.floor(clipListContainerWidth / clipWidth);
+    if (clipPerPageCount <= 1) {
+      clipPerPageCount = 1;
+    } else {
+      const clipMargin = (clipListContainerWidth - clipWidth * clipPerPageCount) / clipPerPageCount;
+      if (clipMargin < minClipMargin) {
         clipPerPageCount -= 1;
       }
-    }else{
-      clipPerPageCount = 1;
     }
-      let pageCount = Math.floor(this.clips.length / clipPerPageCount);
-      if (pageCount * clipPerPageCount !== this.clips.length) pageCount += 1;
 
-      if (clipPerPageCount === 1) this.wrapperElement.classList.add('clip-list__wrapper_content-center');
+    if (clipPerPageCount === 1) {
+      this.wrapperElement.classList.add('clip-list__wrapper_content-center');
+    }
 
-      if (clipPerPageCount !== this.clipsPerPageCount) {
-        if (this.clipsPerPageCount === 1) this.wrapperElement.classList.remove('clip-list__wrapper_content-center');
+    let pageCount = Math.floor(this.clips.length / clipPerPageCount);
+    if (pageCount * clipPerPageCount !== this.clips.length) pageCount += 1;
 
-        while (this.wrapperElement.firstChild) {
-          this.wrapperElement.removeChild(this.wrapperElement.firstChild);
-        }
-        if (this.clipNavigation.currentPage > pageCount) {
-          this.clipList.pageClips = this.clips.slice((pageCount - 1) * clipPerPageCount, pageCount * clipPerPageCount);
-          this.clipNavigation.currentPage = pageCount;
-        } else {
-          this.clipList.pageClips = this.clips.slice((this.clipNavigation.currentPage - 1) * clipPerPageCount,
-            this.clipNavigation.currentPage * clipPerPageCount);
-        }
+    if (clipPerPageCount !== this.clipsPerPageCount) {
+      if (this.clipsPerPageCount === 1) {
+        this.wrapperElement.classList.remove('clip-list__wrapper_content-center');
       }
-      this.clipsPerPageCount = clipPerPageCount;
+      if (this.clipNavigation.currentPage > pageCount) {
+        this.clipList.pageClips = this.clips.slice(
+          (pageCount - 1) * clipPerPageCount,
+          pageCount * clipPerPageCount,
+        );
+        this.clipNavigation.currentPage = pageCount;
+      } else {
+        this.clipList.pageClips = this.clips.slice(
+          (this.clipNavigation.currentPage - 1) * clipPerPageCount,
+          this.clipNavigation.currentPage * clipPerPageCount,
+        );
+      }
+    }
+    this.clipsPerPageCount = clipPerPageCount;
 
-      this.clipNavigation.pagesCount = pageCount;
+    this.clipNavigation.pagesCount = pageCount;
   }
 
   loadClips(keyword, chunkSize, pageNumber) {
-    getClipList(keyword, chunkSize).then((response) => {
-      const newClips = JSON.parse(response).items;
-      this.Clips = newClips.slice(chunkSize - clipsChunkSize, chunkSize);
-      this.updateListSettings();
-      this.updateWrapper(pageNumber);
-    })
+    return api
+      .getClipList(keyword, chunkSize)
+      .then((response) => {
+        const newClips = JSON.parse(response).items;
+        this.Clips = newClips.slice(chunkSize - clipsChunkSize, chunkSize);
+        this.updateListSettings();
+        this.updateWrapper(pageNumber);
+      })
       .catch((err) => {
         this.clipList.innerText = err;
       });
@@ -181,24 +202,24 @@ export default class ClipsContainer {
     });
 
     this.container.addEventListener('mousemove', (event) => {
-        if(down){
-          const newMouseX = event.clientX;
-          translateX = newMouseX - mouseX;
-          this.wrapperElement.style.left = `${translateX}px`;
-        }
+      if (down) {
+        const newMouseX = event.clientX;
+        translateX = newMouseX - mouseX;
+        this.wrapperElement.style.left = `${translateX}px`;
+      }
     });
 
     this.container.addEventListener('touchmove', (event) => {
-        down = true;
-        const newSwipeX = event.touches[0].pageX;
-        const newSwipeY = event.touches[0].pageY;
+      down = true;
+      const newSwipeX = event.touches[0].pageX;
+      const newSwipeY = event.touches[0].pageY;
 
-        if(Math.abs(newSwipeX - swipeX) < Math.abs(newSwipeY - swipeY)){
-          down = false;
-        }else{
-          translateX = newSwipeX - swipeX;
-          this.wrapperElement.style.left = `translateX(${translateX}px)`;
-        }
+      if (Math.abs(newSwipeX - swipeX) < Math.abs(newSwipeY - swipeY)) {
+        down = false;
+      } else {
+        translateX = newSwipeX - swipeX;
+        this.wrapperElement.style.left = `translateX(${translateX}px)`;
+      }
     });
 
     this.container.addEventListener('mouseup', () => {
