@@ -1,4 +1,4 @@
-const makeRequest = (method, url) => new Promise(((resolve, reject) => {
+const makeRequest = (method, url) => new Promise((resolve, reject) => {
   const xhr = new XMLHttpRequest();
   function requestListener() {
     if (this.status >= 200 && this.status < 300) {
@@ -15,10 +15,14 @@ const makeRequest = (method, url) => new Promise(((resolve, reject) => {
   xhr.onload = requestListener;
   xhr.onerror = errorHandler;
   xhr.send();
-}));
+});
 
-export const getClipList = (query, maxResults) => makeRequest('GET',
-  `https://www.googleapis.com/youtube/v3/search?maxResults=${maxResults}&part=snippet&type=video&key=AIzaSyDXwwh51G-zqD-zbMkzMjQpm_Mg8zRUf4Y&q=${query}`);
+export const getClipList = (query, nextPageToken) => makeRequest(
+  'GET',
+  `https://www.googleapis.com/youtube/v3/search?maxResults=15&pageToken=${nextPageToken}&part=snippet&type=video&key=AIzaSyDXwwh51G-zqD-zbMkzMjQpm_Mg8zRUf4Y&q=${query}`,
+);
 
-export const getViewCount = videoId => makeRequest('GET',
-  `https://www.googleapis.com/youtube/v3/videos?part=statistics&key=AIzaSyDXwwh51G-zqD-zbMkzMjQpm_Mg8zRUf4Y&id=${videoId}`);
+export const getViewCount = videoId => makeRequest(
+  'GET',
+  `https://www.googleapis.com/youtube/v3/videos?part=statistics&key=AIzaSyDXwwh51G-zqD-zbMkzMjQpm_Mg8zRUf4Y&id=${videoId}`,
+);

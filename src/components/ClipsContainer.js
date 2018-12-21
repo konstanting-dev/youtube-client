@@ -9,6 +9,7 @@ import { clipsChunkSize, clipWidth, minClipMargin } from '../constants';
 export default class ClipsContainer {
   init(container) {
     this.container = container;
+    this.pageToken = '';
     this.clips = [];
     this.clipsPerPageCount = 0;
     this.chunkSize = clipsChunkSize;
@@ -126,18 +127,28 @@ export default class ClipsContainer {
     this.clipNavigation.pagesCount = pageCount;
   }
 
-  loadClips(keyword, chunkSize, pageNumber) {
+  loadClips(keyword, pageNumber) {
     return api
-      .getClipList(keyword, chunkSize)
+      .getClipList(keyword, this.pageToken)
       .then((response) => {
-        const newClips = JSON.parse(response).items;
-        this.Clips = newClips.slice(chunkSize - clipsChunkSize, chunkSize);
+        const parsedResponse = JSON.parse(response);
+        this.pageToken = parsedResponse.nextPageToken;
+        const newClips = parsedResponse.items;
+        this.Clips = newClips.slice(15 - clipsChunkSize, 15);
         this.updateListSettings();
         this.updateWrapper(pageNumber);
       })
       .catch((err) => {
         this.clipList.innerText = err;
       });
+  }
+
+  pageChange(pageNumber) {
+    if (pageNumber === this.clipNavigation.pagesCount) {
+      this.loadClips(this.searchInput.keyword, pageNumber);
+    } else {
+      this.updateWrapper(pageNumber);
+    }
   }
 
   render() {
@@ -168,18 +179,13 @@ export default class ClipsContainer {
       this.clips.length = 0;
       this.chunkSize = clipsChunkSize;
       this.clipNavigation.currentPageValue = 0;
-      this.loadClips(this.searchInput.keyword, this.chunkSize, 1);
+      this.loadClips(this.searchInput.keyword, 1);
     });
 
     this.navigationElement.addEventListener('click', (event) => {
       if (event.target.className === 'dot') {
         const newPage = parseInt(event.target.innerText, 10);
-        if (newPage === this.clipNavigation.pagesCount) {
-          this.chunkSize += clipsChunkSize;
-          this.loadClips(this.searchInput.keyword, this.chunkSize, newPage);
-        } else {
-          this.updateWrapper(newPage);
-        }
+        this.pageChange(newPage);
       }
     });
 
@@ -203,6 +209,7 @@ export default class ClipsContainer {
 
     this.container.addEventListener('mousemove', (event) => {
       if (down) {
+        event.preventDefault();
         const newMouseX = event.clientX;
         translateX = newMouseX - mouseX;
         this.wrapperElement.style.left = `${translateX}px`;
@@ -226,8 +233,8 @@ export default class ClipsContainer {
       if (down) {
         const currPage = this.clipNavigation.currentPage;
         this.wrapperElement.style.left = '0px';
-        if (translateX < 0) this.updateWrapper(currPage + 1);
-        else if (translateX > 0 && currPage !== 1) this.updateWrapper(currPage - 1);
+        if (translateX < 0) this.pageChange(currPage + 1);
+        else if (translateX > 0 && currPage !== 1) this.pageChange(currPage - 1);
         down = false;
       }
     });
@@ -236,8 +243,8 @@ export default class ClipsContainer {
       if (down) {
         const currPage = this.clipNavigation.currentPage;
         this.wrapperElement.style.left = '0px';
-        if (translateX < 0) this.updateWrapper(currPage + 1);
-        else if (translateX > 0 && currPage !== 1) this.updateWrapper(currPage - 1);
+        if (translateX < 0) this.pageChange(currPage + 1);
+        else if (translateX > 0 && currPage !== 1) this.pageChange(currPage - 1);
         down = false;
       }
     });
